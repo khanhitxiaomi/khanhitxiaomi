@@ -1,15 +1,14 @@
 #!/bin/bash
 
 VERSION="4.68"
-BASE_URL="https://raw.githubusercontent.com/yourname/tvtool/main"
+BASE_URL="https://raw.githubusercontent.com/khanhitxiaomi/khanhitxiaomi/main/khanhxiaomi"
 
 # ===== CHỐNG DEBUG =====
 [[ "$-" == *x* ]] && exit
 
 # ===== CHECK KEY =====
 check_key() {
-  echo "🔐 NHẬP KEY:"
-  read -p "👉 KEY: " USER_KEY
+  read -p "🔐 Nhập key: " USER_KEY
 
   DEVICE=$(getprop ro.serialno 2>/dev/null || hostname)
 
@@ -25,13 +24,13 @@ check_key() {
   STATUS=$(echo "$LINE" | cut -d'|' -f2)
   KEY_DEVICE=$(echo "$LINE" | cut -d'|' -f3)
 
-  if [[ "$STATUS" != "active" ]]; then
+  [[ "$STATUS" != "active" ]] && {
     echo "❌ KEY BỊ KHÓA"
     exit
-  fi
+  }
 
   if [[ -n "$KEY_DEVICE" && "$KEY_DEVICE" != "$DEVICE" ]]; then
-    echo "❌ KEY KHÁC THIẾT BỊ"
+    echo "❌ KHÁC THIẾT BỊ"
     exit
   fi
 
@@ -48,16 +47,20 @@ check_update() {
     curl -s -o "$0" $BASE_URL/tool.sh
     chmod +x "$0"
 
-    echo "✅ UPDATE XONG"
+    echo "✅ XONG → MỞ LẠI"
     exit
   fi
 }
 
 # ===== LOAD CORE =====
 load_core() {
-  echo "📡 LOAD DATA..."
+  TMP="/tmp/core.txt"
 
-  curl -s $BASE_URL/core.txt | base64 -d | bash
+  curl -s $BASE_URL/core.txt -o $TMP
+
+  [ ! -s "$TMP" ] && exit
+
+  base64 -d $TMP | base64 -d | bash
 }
 
 # ===== RUN =====
