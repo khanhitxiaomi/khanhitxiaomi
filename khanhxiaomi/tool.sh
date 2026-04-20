@@ -3,67 +3,97 @@
 VERSION="4.68"
 BASE_URL="https://raw.githubusercontent.com/khanhitxiaomi/khanhitxiaomi/main/khanhxiaomi"
 
-# ===== CHỐNG DEBUG =====
-[[ "$-" == *x* ]] && exit
+# ===== BLOCK DEBUG =====
+set +x 2>/dev/null
+
+# ===== COLOR =====
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+CYAN='\033[1;36m'
+NC='\033[0m'
 
 # ===== CHECK KEY =====
 check_key() {
-  read -p "🔐 Nhập key: " USER_KEY
+  echo -e "${CYAN}🔐 CHECK KEY...${NC}"
+
+  read -p "Nhập key: " USER_KEY
 
   DEVICE=$(getprop ro.serialno 2>/dev/null || hostname)
 
-  DATA=$(curl -s $BASE_URL/keys.txt)
+  DATA=$(curl -s "$BASE_URL/keys.txt")
 
   LINE=$(echo "$DATA" | grep "^$USER_KEY|")
 
-  [ -z "$LINE" ] && {
-    echo "❌ KEY SAI"
-    exit
-  }
+  if [ -z "$LINE" ]; then
+    echo -e "${RED}❌ KEY SAI${NC}"
+    exit 1
+  fi
 
   STATUS=$(echo "$LINE" | cut -d'|' -f2)
   KEY_DEVICE=$(echo "$LINE" | cut -d'|' -f3)
 
-  [[ "$STATUS" != "active" ]] && {
-    echo "❌ KEY BỊ KHÓA"
-    exit
-  }
-
-  if [[ -n "$KEY_DEVICE" && "$KEY_DEVICE" != "$DEVICE" ]]; then
-    echo "❌ KHÁC THIẾT BỊ"
-    exit
+  if [ "$STATUS" != "active" ]; then
+    echo -e "${RED}❌ KEY BỊ KHÓA${NC}"
+    exit 1
   fi
 
-  echo "✅ KEY OK"
+  if [ -n "$KEY_DEVICE" ] && [ "$KEY_DEVICE" != "$DEVICE" ]; then
+    echo -e "${RED}❌ SAI THIẾT BỊ${NC}"
+    exit 1
+  fi
+
+  echo -e "${GREEN}✅ KEY OK${NC}"
 }
 
-# ===== UPDATE =====
+# ===== CHECK UPDATE =====
 check_update() {
-  NEW=$(curl -s $BASE_URL/version.txt)
+  echo -e "${BLUE}🔄 CHECK UPDATE...${NC}"
 
-  if [[ "$NEW" != "$VERSION" ]]; then
-    echo "🚀 UPDATE..."
+  NEW_VERSION=$(curl -s "$BASE_URL/version.txt")
 
-    curl -s -o "$0" $BASE_URL/tool.sh
-    chmod +x "$0"
+  if [ "$NEW_VERSION" != "$VERSION" ]; then
+    echo -e "${YELLOW}🚀 ĐANG UPDATE TOOL...${NC}"
 
-    echo "✅ XONG → MỞ LẠI"
-    exit
+    curl -s -o tool.sh "$BASE_URL/tool.sh"
+    chmod +x tool.sh
+
+    echo -e "${GREEN}✅ UPDATE XONG - CHẠY LẠI TOOL${NC}"
+    exit 0
   fi
 }
 
 # ===== LOAD CORE =====
 load_core() {
-  TMP="/tmp/core.txt"
+  echo -e "${CYAN}📦 LOAD CORE...${NC}"
 
-  curl -s $BASE_URL/core.txt -o $TMP
+  TMP="/sdcard/Download/core.txt"
 
-  [ ! -s "$TMP" ] && exit
+  curl -s "$BASE_URL/core.txt" -o "$TMP"
 
-  base64 -d $TMP | base64 -d | bash
+  if [ ! -s "$TMP" ]; then
+    echo -e "${RED}❌ LOAD CORE FAIL${NC}"
+    exit 1
+  fi
+
+  # decode base64 và chạy
+  CODE=$(base64 -d "$TMP" 2>/dev/null)
+
+  if [ -z "$CODE" ]; then
+    echo -e "${RED}❌ DECODE FAIL${NC}"
+    exit 1
+  fi
+
+  bash -c "$CODE"
 }
 
-# ===== RUN =====
+# ===== RUN MAIN =====
+clear
+echo -e "${GREEN}================================"
+echo -e "   TOOL XIAOMI TV PRO LOADER"
+echo -e "================================${NC}"
+
 check_key
 check_update
 load_core
