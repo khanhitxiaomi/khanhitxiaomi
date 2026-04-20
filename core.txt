@@ -1,0 +1,1 @@
+base64 yourscript.sh | base64 > ~/storage/shared/Download/core.txt
