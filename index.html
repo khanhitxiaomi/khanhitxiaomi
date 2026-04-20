@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KHANH TOOL STORE PRO MAX</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b0f14;
+  color: #fff;
+}
+
+/* HEADER */
+.header {
+  padding: 14px;
+  background: linear-gradient(90deg,#00c853,#00b0ff);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* CONTAINER */
+.container {
+  padding: 12px;
+}
+
+/* SEARCH */
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 12px;
+  font-size: 15px;
+  outline: none;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+/* CARD */
+.card {
+  background: #151c24;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.title {
+  font-weight: bold;
+  color: #00e5ff;
+  font-size: 15px;
+}
+
+.guide {
+  font-size: 13px;
+  color: #ffcc00;
+  margin: 6px 0;
+}
+
+.status {
+  font-size: 12px;
+  color: #aaa;
+  margin: 6px 0;
+}
+
+/* BUTTON */
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #00c853;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:active {
+  background: #00e676;
+  transform: scale(0.98);
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🔥 KHANH TOOL STORE PRO MAX FINAL</div>
+
+<div class="container">
+
+<input id="search" placeholder="🔍 Tìm tool..." oninput="filter()">
+
+<div class="grid" id="list"></div>
+
+</div>
+
+<script>
+
+const jsonURL =
+"https://raw.githubusercontent.com/dinhkhackhanhdz-blip/khanhtool/main/codeupdate.json";
+
+/* =========================
+   🔥 COPY FIX 100% MOBILE
+========================= */
+function copyText(txt){
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(txt)
+      .then(() => toast("📋 Đã copy!"))
+      .catch(() => fallbackCopy(txt));
+  } else {
+    fallbackCopy(txt);
+  }
+}
+
+function fallbackCopy(txt){
+  let ta = document.createElement("textarea");
+  ta.value = txt;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+
+  try {
+    document.execCommand("copy");
+    toast("📋 Đã copy!");
+  } catch {
+    toast("❌ Copy lỗi");
+  }
+
+  document.body.removeChild(ta);
+}
+
+/* =========================
+   🔥 TOAST NHẸ (KHÔNG ALERT)
+========================= */
+function toast(msg){
+  let div = document.createElement("div");
+  div.innerText = msg;
+  div.style.position = "fixed";
+  div.style.bottom = "20px";
+  div.style.left = "50%";
+  div.style.transform = "translateX(-50%)";
+  div.style.background = "#000";
+  div.style.color = "#fff";
+  div.style.padding = "10px 15px";
+  div.style.borderRadius = "8px";
+  div.style.zIndex = "9999";
+  div.style.opacity = "0.9";
+
+  document.body.appendChild(div);
+
+  setTimeout(() => div.remove(), 1500);
+}
+
+/* =========================
+   🔍 SEARCH
+========================= */
+function filter(){
+  let key = document.getElementById("search").value.toLowerCase();
+  document.querySelectorAll(".card").forEach(c => {
+    c.style.display = c.innerText.toLowerCase().includes(key)
+      ? "block" : "none";
+  });
+}
+
+/* =========================
+   📥 LOAD TXT
+========================= */
+async function loadTXT(url){
+  try {
+    let res = await fetch(url);
+    return await res.text();
+  } catch {
+    return "❌ Lỗi load file";
+  }
+}
+
+/* =========================
+   🚀 START
+========================= */
+async function start(){
+  let res = await fetch(jsonURL);
+  let data = await res.json();
+
+  let list = Array.isArray(data) ? data : Object.values(data);
+
+  let container = document.getElementById("list");
+  container.innerHTML = "";
+
+  let tasks = [];
+
+  list.forEach((item, i) => {
+
+    let card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="title">📌 ${item.name || ("Tool " + (i+1))}</div>
+      <div class="guide">📖 ${item.guide || "Không có hướng dẫn"}</div>
+    `;
+
+    let status = document.createElement("div");
+    status.className = "status";
+    status.innerText = "⏳ Đang load...";
+
+    let btn = document.createElement("button");
+    btn.innerText = "📋 Copy nội dung";
+
+    let txtData = "";
+
+    btn.onclick = () => {
+      if(txtData) copyText(txtData);
+      else toast("⏳ Chưa load xong!");
+    };
+
+    card.appendChild(status);
+    card.appendChild(btn);
+    container.appendChild(card);
+
+    tasks.push({item, status, btn});
+  });
+
+  /* 🔥 LOAD SONG SONG */
+  await Promise.all(tasks.map(async (t) => {
+    let url = t.item.url || t.item;
+    let txt = await loadTXT(url);
+    t.status.innerText = "✅ Ready";
+    t.btn._txt = txt;
+    t.btn.onclick = () => copyText(txt);
+  }));
+
+}
+
+start();
+
+</script>
+
+</body>
+</html>
