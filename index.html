@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KHANH TOOL STORE PRO MAX</title>
+<title>KHÁNH IT BY XIAOMI</title>
 
 <style>
 body {
@@ -99,7 +99,7 @@ button:active {
 
 <body>
 
-<div class="header">🔥 KHANH TOOL STORE PRO MAX FINAL</div>
+<div class="header">🔥 KHÁNH IT TOOL CÀI TIVI XIAOMI TRÊN ĐIỆN THOẠI</div>
 
 <div class="container">
 
@@ -121,7 +121,7 @@ function copyText(txt){
 
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(txt)
-      .then(() => toast("📋 Đã copy!"))
+      .then(() => toast("📋 Đã Coppy Thành Công !"))
       .catch(() => fallbackCopy(txt));
   } else {
     fallbackCopy(txt);
@@ -139,7 +139,7 @@ function fallbackCopy(txt){
 
   try {
     document.execCommand("copy");
-    toast("📋 Đã copy!");
+    toast("📋 Đã Sao Chép Thành Công !");
   } catch {
     toast("❌ Copy lỗi");
   }
@@ -241,7 +241,7 @@ async function start(){
   await Promise.all(tasks.map(async (t) => {
     let url = t.item.url || t.item;
     let txt = await loadTXT(url);
-    t.status.innerText = "✅ Ready";
+    t.status.innerText = "✅ Đã Sẵn Sàng Ready";
     t.btn._txt = txt;
     t.btn.onclick = () => copyText(txt);
   }));
