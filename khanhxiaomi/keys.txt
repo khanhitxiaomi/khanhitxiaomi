@@ -1,0 +1,3 @@
+ABC123|active||999
+VIP999|active||999
+TEST001|block||0
