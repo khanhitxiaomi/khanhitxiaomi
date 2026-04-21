@@ -1,6 +1,3 @@
-KHANHIT|active||999
-ABC123|active||999
-IP123|active||999
-TEST123|active||999
-VIP|active||999
-TEST|block||0
+123|active||999
+vip|active||999
+1234|block||0
